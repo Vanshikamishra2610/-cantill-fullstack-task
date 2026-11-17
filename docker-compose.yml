@@ -1,0 +1,28 @@
+services:
+  app:
+    build: .
+    ports:
+      - "8000:8000"
+    environment:
+      # Optional AI (policy reader + chat understanding). Set ONE of these keys:
+      GEMINI_API_KEY: ${GEMINI_API_KEY:-}        # free tier: https://aistudio.google.com/apikey
+      ANTHROPIC_API_KEY: ${ANTHROPIC_API_KEY:-}  # paid
+      LLM_MODEL: ${LLM_MODEL:-}                  # optional model override
+      DATABASE_URL: postgresql://corvo:corvo@db:5432/corvo
+    depends_on:
+      db:
+        condition: service_healthy
+  db:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_USER: corvo
+      POSTGRES_PASSWORD: corvo
+      POSTGRES_DB: corvo
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U corvo"]
+      interval: 3s
+      retries: 20
+volumes:
+  pgdata:

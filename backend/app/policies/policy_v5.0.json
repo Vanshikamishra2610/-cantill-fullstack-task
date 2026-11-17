@@ -1,0 +1,84 @@
+{
+  "version": "5.0",
+  "effective_from": "2026-04-01",
+  "title": "Corvo Engineering Procurement Policy (PR to PO) - CORVO-PROC-POL-04",
+  "summary": "Baseline policy v5.0: item matching, clubbing, valuation, contracts, decision rules 5.1-5.7, preferred suppliers and PO consolidation.",
+  "parameters": {
+    "matching": {"min_score": 0.6, "ambiguity_margin": 0.05, "vague_score": 0.4},
+    "clubbing": {"enabled": true, "creation_window_days": 14, "need_by_window_days": 7, "exclude_new_items": true},
+    "duplicates": {"enabled": true, "window_minutes": 60},
+    "valuation": {"price_lookback_days": 365},
+    "history": {"purchase_lookback_days": 365},
+    "contracts": {"require_active_supplier": true, "ceiling_tolerance_pct": 0},
+    "preferred_list": {
+      "po_lookback_days": 548,
+      "include_contract_holders": true,
+      "weights": {"frequency": 0.35, "recency": 0.25, "contract": 0.20, "performance": 0.20},
+      "recency_buckets": [{"max_days": 90, "score": 1.0}, {"max_days": 365, "score": 0.5}],
+      "on_time_weight": 0.5,
+      "quality_weight": 0.5
+    },
+    "suggestions": {"top_up_from_category": true},
+    "consolidation": {"enabled": true, "window_hours": 24, "match_on": ["supplier", "plant", "route"]},
+    "eligibility": {"allowed_supplier_statuses": ["Active"], "min_quality_rating": 0, "min_on_time_pct": 0}
+  },
+  "overrides": [],
+  "rules": [
+    {
+      "id": "R-1.2",
+      "clause": "1.2",
+      "title": "New item (not in the item master) goes to sourcing",
+      "when": {"field": "is_new_item", "op": "eq", "value": true},
+      "outcome": {"decision": "SOURCING_REQUEST", "route": "NEW_ITEM_SOURCING", "supplier": "none", "note": "Buyer finds suppliers; valued at the requester's estimate."}
+    },
+    {
+      "id": "R-5.1",
+      "clause": "5.1",
+      "title": "Capex items go to capex sourcing",
+      "when": {"field": "item_type", "op": "eq", "value": "Capex"},
+      "outcome": {"decision": "SOURCING_REQUEST", "route": "CAPEX_SOURCING", "supplier": "suggest", "suggest_count": 5, "note": "Needs capex approval."}
+    },
+    {
+      "id": "R-5.2",
+      "clause": "5.2",
+      "title": "A usable rate contract exists",
+      "when": {"field": "contract_available", "op": "eq", "value": true},
+      "outcome": {"decision": "PO", "route": "CONTRACT_PO", "supplier": "contract"}
+    },
+    {
+      "id": "R-5.3",
+      "clause": "5.3",
+      "title": "Emergency up to 5,00,000 with recent purchase history",
+      "when": {"all": [
+        {"field": "is_emergency", "op": "eq", "value": true},
+        {"field": "value", "op": "lte", "value": 500000},
+        {"field": "bought_recently", "op": "eq", "value": true}
+      ]},
+      "outcome": {"decision": "PO", "route": "EMERGENCY_PO", "supplier": "preferred"}
+    },
+    {
+      "id": "R-5.4",
+      "clause": "5.4",
+      "title": "Below 2,00,000 with recent purchase history",
+      "when": {"all": [
+        {"field": "value", "op": "lt", "value": 200000},
+        {"field": "bought_recently", "op": "eq", "value": true}
+      ]},
+      "outcome": {"decision": "PO", "route": "SPOT_PO", "supplier": "preferred"}
+    },
+    {
+      "id": "R-5.5",
+      "clause": "5.5",
+      "title": "Below 10,00,000 needs quotes",
+      "when": {"field": "value", "op": "lt", "value": 1000000},
+      "outcome": {"decision": "SOURCING_REQUEST", "route": "RFQ", "supplier": "suggest", "suggest_count": 3}
+    },
+    {
+      "id": "R-5.6",
+      "clause": "5.6",
+      "title": "10,00,000 or more needs a formal RFP",
+      "when": {"field": "value", "op": "gte", "value": 1000000},
+      "outcome": {"decision": "SOURCING_REQUEST", "route": "RFP", "supplier": "suggest", "suggest_count": 5}
+    }
+  ]
+}
