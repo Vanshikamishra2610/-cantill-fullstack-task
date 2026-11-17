@@ -5,7 +5,7 @@ Corvo's procurement policy, whether to place a purchase order or raise a sourcin
 stored as versioned data: Procurement uploads or describes an amendment, reviews what will change in plain
 language, and approves it from an effective date. No code change is needed.
 
-- **Hosted app:** _add the Render URL here after deploying (see below)_
+- **Hosted app:** https://corvo-pr-to-po-soer.onrender.com (free Render plan: the first load after idle can take about a minute)
 - Design notes: [DECISIONS.md](DECISIONS.md) (judgment calls, supplier ranking) · [APPROACH.md](APPROACH.md) (architecture, AI use, tests)
 
 ## Run it
