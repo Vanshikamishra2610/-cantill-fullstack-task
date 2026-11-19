@@ -112,3 +112,29 @@ Why this shape:
 - The engine's decision is stored unchanged. An override stores the buyer's decision next to it with the required comment (at least 5 characters), and both appear in the requirement history and the audit log.
 - `export.csv` gives the engine's decisions (the format for scoring); `?include_overrides=true` gives the buyer-final view, with the override reason in `reason`.
 - There is no login in this prototype. The user picker in the sidebar sets who is acting, and every API call records that name. Real deployment would put SSO in front of the API.
+
+## 12. Blind test notes (19 Nov 2026)
+
+All three files were produced on the hosted app; no code was changed.
+
+- **Run 1** (`submission/vanshika_mishra__run1.csv`): `hidden_pr_batch.csv` uploaded to the workspace, all 190 lines decided under v5.0.
+- **Run 2** (`submission/vanshika_mishra__run2.csv`): the amendment PDF was uploaded through Policy → Propose a change. The review screen showed that the AI's reading was incomplete, so that draft was rejected with the reasons recorded:
+  - It added a Packaging spot rule but left rule 5.4 at 2,00,000, so Packaging at 1–2 lakh would still have got a spot PO.
+  - Its rule 5.2A always routed to RFQ, ignoring "RFP at or above the RFP threshold".
+- The amendment was then described in the policy chat. Two chat drafts were also rejected:
+  - One was numbered 5.2, because the rejected draft still held 5.1.
+  - One placed the Packaging rule after 5.5, where it could never apply.
+- The approved v5.1 (effective 1 Dec 2026, approved by Procurement) changes:
+  - Rule 5.4 is "below 2,00,000 with recent history, except Packaging at 1,00,000 or more".
+  - Rules 5.5 and 5.6 use 8,00,000.
+  - New rule 5.2A sits right after 5.2: CHK1 Electrical Spares at 50,000 or more go to RFQ, or to RFP at 8,00,000 or more. Contract POs under 5.2 still win.
+- The full trail is in the Policy page and the audit log.
+- The batch was then reprocessed.
+- **Effective date:** the policy is chosen by each requirement's creation date, and a clubbed requirement uses its earliest line. So 91 lines created before 1 Dec stay on v5.0, and 99 lines use v5.1.
+- **Changes against Run 1:**
+  - 8 spot POs became RFQ under 5.2A (Chakan electrical).
+  - 7 spot POs became RFQ under 5.5 (Packaging at 1,00,000 or more).
+  - 4 RFQs became RFP under the 8,00,000 threshold.
+  - PO numbers shift because fewer POs are raised.
+- **Preferred suppliers** (`submission/vanshika_mishra__preferred.csv`): top 3 per item as of 2026-12-01, giving 68 items and 155 rows. Items with fewer than three eligible suppliers have fewer rows.
+- Both runs were cross-checked against the engine run locally on the same batch (0 differences). For Run 2 the check used a hand-built v5.1.
